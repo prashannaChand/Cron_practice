@@ -1,27 +1,19 @@
-#dummy testing for cron 
-import os
-import sys
-import sqlite3
+from supabase import create_client, Client
 from datetime import datetime
+import os
+
+SUPABASE_URL = "https://bhkhyhhnpvwsxjzvxxet.supabase.co"
+SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJoa2h5aGhucHZ3c3hqenZ4eGV0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTExNzU5OTcsImV4cCI6MjA2Njc1MTk5N30.2AW1-y-cILgVVdpCTbcezgUD04JsGWPRZG-1ZLhPGK0"  # Replace with your actual anon key
 
 def log_run_time():
-    conn = sqlite3.connect('cron_runs.db')
-    c = conn.cursor()
-    c.execute('''
-        CREATE TABLE IF NOT EXISTS runs (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            run_time TEXT NOT NULL
-        )
-    ''')
-    c.execute('INSERT INTO runs (run_time) VALUES (?)', (datetime.now().isoformat(),))
-    conn.commit()
-    conn.close()
+    supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
+    data = {"run_time": datetime.now().isoformat()}
+    supabase.table("runs").insert(data).execute()
 
 def main():
     print("Hello from GitHub Actions cron job!")
-    print("last time updated on :", os.path.getmtime(__file__))
+    print("last time updated on :", datetime.now().isoformat())
     log_run_time()
 
 if __name__ == "__main__":
     main()
-    sys.exit(0)
