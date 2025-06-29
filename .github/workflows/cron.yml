@@ -1,13 +1,36 @@
+name: Run hello.py on schedule
+
+on:
+  schedule:
+    - cron: '* * * * *'  # Runs every minute (UTC)
+  workflow_dispatch:      # Optional manual run trigger
+
 jobs:
   run-script:
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.x'
-      - name: Install dependencies
+
+      - name: Ensure pip is installed
+        run: python -m ensurepip --upgrade
+
+      - name: Install Supabase client
         run: pip install supabase
+
+      - name: Show current time
+        run: echo "Running at $(date -u) UTC"
+
       - name: Run hello.py
-        run: python hello.py
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+        run: |
+          echo "Running hello.py..."
+          python hello.py || { echo 'Script failed'; exit 1; }
